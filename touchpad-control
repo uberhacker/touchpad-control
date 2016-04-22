@@ -1,0 +1,32 @@
+#!/bin/bash
+XINPUT=$(dpkg -l | grep "^ii  xinput" 2> /dev/null)
+if [ -z "$XINPUT" ]; then
+  sudo apt-get install xinput
+fi
+DEVICE=$(xinput | grep -i touchpad | cut -d= -f2 | cut -d$'\t' -f1 2> /dev/null)
+if [ -z "$DEVICE" ]; then
+  echo "Unable to find touchpad device."
+  exit 1
+fi
+PROPERTY=$(xinput --list-props $DEVICE | grep -i "device enabled" | cut -d$'(' -f2 | cut -d$')' -f1 2> /dev/null)
+if [ -z "$PROPERTY" ]; then
+  echo "Unable to find touchpad device property."
+  exit 1
+fi
+CURRENT=$(xinput --list-props $DEVICE | grep -i "device enabled" | cut -d: -f2 | xargs 2> /dev/null)
+echo -n "Enter 0 to disable or 1 to enable the touchpad [$CURRENT]: "; read -n 1 VALUE
+echo ""
+if [ -z "$VALUE" ]; then
+  VALUE=$CURRENT
+fi
+if [[ $VALUE != 0 && $VALUE != 1 ]]; then
+  echo "Value must be either 0 or 1."
+  exit 1;
+fi
+xinput --set-prop $DEVICE $PROPERTY $VALUE
+if [ $VALUE == 1 ]; then
+  echo "Touchpad device enabled."
+else
+  echo "Touchpad device disabled."
+fi
+echo ""
