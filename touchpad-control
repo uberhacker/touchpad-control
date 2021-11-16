@@ -5,37 +5,37 @@ if [ -z "$XINPUT" ]; then
 fi
 DEVICE=$(xinput | grep -i touchpad | cut -d= -f2 | cut -d$'\t' -f1 2> /dev/null)
 if [ -z "$DEVICE" ]; then
-  echo ""
+  echo
   echo "Unable to find touchpad device."
-  echo ""
+  echo
   exit 1
 fi
 NAME=$(xinput | grep -i touchpad | tr -d -c '[:print:]' | xargs | cut -d' ' -f1-2 2> /dev/null)
 PROPERTY=$(xinput --list-props $DEVICE | grep -i "device enabled" | cut -d$'(' -f2 | cut -d$')' -f1 2> /dev/null)
 if [ -z "$PROPERTY" ]; then
-  echo ""
+  echo
   echo "Unable to find touchpad device property."
-  echo ""
+  echo
   exit 1
 fi
 CURRENT=$(xinput --list-props $DEVICE | grep -i "device enabled" | cut -d: -f2 | xargs 2> /dev/null)
-echo ""
+echo
 echo -n "Enter 0 to disable or 1 to enable the touchpad [$CURRENT]: "; read -n 1 VALUE
 if [ -z "$VALUE" ]; then
   VALUE=$CURRENT
 else
-  echo ""
+  echo
 fi
-echo ""
+echo
 if [[ $VALUE != 0 && $VALUE != 1 ]]; then
   echo "Value must be either 0 or 1."
-  echo ""
+  echo
   if [ $CURRENT == 1 ]; then
     echo "$NAME device is still enabled."
   else
     echo "$NAME device is still disabled."
   fi
-  echo ""
+  echo
   exit 1;
 fi
 xinput --set-prop $DEVICE $PROPERTY $VALUE
@@ -44,4 +44,4 @@ if [ $VALUE == 1 ]; then
 else
   echo "$NAME device disabled."
 fi
-echo ""
+echo
