@@ -1,4 +1,5 @@
 #!/bin/bash
+ERROR="Value must be either 0 or 1."
 XINPUT=$(dpkg -l | grep "^ii  xinput" 2> /dev/null)
 if [ -z "$XINPUT" ]; then
   sudo apt-get install xinput
@@ -19,26 +20,30 @@ if [ -z "$PROPERTY" ]; then
   exit 1
 fi
 CURRENT=$(xinput --list-props $DEVICE | grep -i "device enabled" | cut -d: -f2 | xargs 2> /dev/null)
-echo
-echo -n "Enter 0 to disable or 1 to enable the touchpad [$CURRENT]: "; read -n 1 VALUE
-if [ -z "$VALUE" ]; then
-  VALUE=$CURRENT
+if test $1; then
+  case $1 in
+    0|1)
+      VALUE=$1
+      ;;
+    *)
+      echo $ERROR
+      exit 1
+      ;;
+  esac
 else
-  echo
-fi
-echo
-if [[ $VALUE != 0 && $VALUE != 1 ]]; then
-  echo "Value must be either 0 or 1."
-  echo
-  if [ $CURRENT == 1 ]; then
-    echo "$NAME device is still enabled."
-  else
-    echo "$NAME device is still disabled."
-  fi
-  echo
-  exit 1;
+  echo -n "Enter 0 to disable or 1 to enable the touchpad [$CURRENT]: "; read -n 1 VALUE
+  [ -z "$VALUE" ] && VALUE=$CURRENT
+  case $VALUE in
+    0|1)
+      ;;
+    *)
+      echo $ERROR
+      exit 1
+      ;;
+  esac
 fi
 xinput --set-prop $DEVICE $PROPERTY $VALUE
+echo
 if [ $VALUE == 1 ]; then
   echo "$NAME device enabled."
 else
